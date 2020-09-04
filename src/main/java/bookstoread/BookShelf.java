@@ -1,6 +1,7 @@
 package bookstoread;
 
 import java.time.Year;
+import java.time.temporal.ValueRange;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,5 +33,17 @@ public class BookShelf {
     public <K> Map<K, List<Book>> groupBy(Function<Book, K> criteria) {
         return this.books.stream()
                 .collect(Collectors.groupingBy(criteria));
+    }
+
+    public Progress progress() {
+        int booksRead = Long.valueOf(this.books.stream().filter(Book::isRead).count()).intValue();
+        int booksInProgress = Long.valueOf(this.books.stream().filter(Book::inProgress).count()).intValue();
+
+        int booksToRead = this.books.size() - booksRead;
+        int percentageCompleted = booksRead * 100 / this.books.size();
+        int percentageInProgress = booksInProgress * 100 / this.books.size();
+        int percentageToRead = 100 - (percentageCompleted + percentageInProgress);
+
+        return new Progress(percentageCompleted, percentageToRead, percentageInProgress);
     }
 }

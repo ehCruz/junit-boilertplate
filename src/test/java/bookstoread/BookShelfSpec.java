@@ -34,7 +34,6 @@ public class BookShelfSpec {
     @DisplayName("IsEmpty Inner Test cases")
     @Nested
     class IsEmpty {
-
         @DisplayName("Shelf is empty when there is no book added")
         @Test
         void shelfEmptyWhenNoBookAdd() throws Exception {
@@ -54,7 +53,6 @@ public class BookShelfSpec {
     @DisplayName("Books are added to the bookshelf")
     @Nested
     class BooksAreAdd {
-
         @DisplayName("Shelf must contain two books")
         @Test
         void shelfContainsTwoBooksWhenTwoBooksAdded() throws Exception {
@@ -130,7 +128,6 @@ public class BookShelfSpec {
     @DisplayName("Books inside the bookshelf are grouped by a criteria")
     @Nested
     class BooksGroupBy {
-
         @DisplayName("Books inside a bookshelf are grouped by Publication Year")
         @Test
         void groupBooksInsideBookShelfByPublicationYear() {

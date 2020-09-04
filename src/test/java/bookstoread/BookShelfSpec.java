@@ -4,9 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.time.LocalDate;
-import java.time.Month;
 import java.time.Year;
 import java.util.*;
 
@@ -14,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("=== BookShelf Class Tests ===")
+@ExtendWith(BooksParameterResolver.class)
 public class BookShelfSpec {
 
     BookShelf shelf;
@@ -23,16 +23,12 @@ public class BookShelfSpec {
     Book cleanCode;
 
     @BeforeEach
-    void setUpShelf() {
+    void setUpShelf(Map<String, Book> books) {
         this.shelf = new BookShelf();
-        this.javaEfetivo =
-                new Book("Java Efetivo", "Joshua Bloch", LocalDate.of(2008, Month.MAY, 8));
-        this.programacaoBaixoNivel =
-                new Book("Programação em Baixo Nível", "Igor Zhirkov", LocalDate.of(2018, Month.APRIL, 12));
-        this.cleanCode =
-                new Book("Código Limpo", "Fulano de Tal", LocalDate.of(2018, Month.DECEMBER, 25));
-        this.segredosdoNinjaJavascript =
-                new Book("Segredos do Ninja Javascript", "John Resig", LocalDate.of(2009, Month.MARCH, 15));
+        this.javaEfetivo = books.get("Java Efetivo");
+        this.programacaoBaixoNivel = books.get("ProgramaÃ§Ã£o em Baixo NÃ­vel");
+        this.cleanCode = books.get("CÃ³digo Limpo");
+        this.segredosdoNinjaJavascript = books.get("Segredos do Ninja Javascript");
     }
 
     @DisplayName("IsEmpty Inner Test cases")

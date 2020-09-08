@@ -1,6 +1,7 @@
 package bookstoread;
 
 import bookstoread.exceptions.BookShelfCapacityReachedException;
+import bookstoread.log.LogginTestExecutionExceptionhandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("=== BookShelf Class Tests ===")
-@ExtendWith(BooksParameterResolver.class)
+@ExtendWith({BooksParameterResolver.class, LogginTestExecutionExceptionhandler.class})
 public class BookShelfSpec {
 
     BookShelf shelf;
@@ -200,7 +201,6 @@ public class BookShelfSpec {
         void throwsExceptionWhenBooksAreAddedAfterCapacityIsReached() throws BookShelfCapacityReachedException {
             BookShelf newShelf = new BookShelf(2);
             newShelf.addBook(javaEfetivo, segredosdoNinjaJavascript);
-
             BookShelfCapacityReachedException throwException =
                     assertThrows(BookShelfCapacityReachedException.class, () -> newShelf.addBook(programacaoBaixoNivel));
             assertEquals("BookShelf capacity of 2 is reached. You can't add more books.", throwException.getMessage());

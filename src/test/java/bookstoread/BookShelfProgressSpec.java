@@ -1,18 +1,16 @@
 package bookstoread;
 
+import bookstoread.exceptions.BookShelfCapacityReachedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.Arrays;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Bookshelf Progress")
 @ExtendWith(BooksParameterResolver.class)
@@ -25,7 +23,7 @@ public class BookShelfProgressSpec {
     Book cleanCode;
 
     @BeforeEach
-    void setUpShelf(Map<String, Book> books) {
+    void setUpShelf(Map<String, Book> books) throws BookShelfCapacityReachedException {
         this.shelf = new BookShelf();
         this.javaEfetivo = books.get("Java Efetivo");
         this.programacaoBaixoNivel = books.get("Programação em Baixo Nível");

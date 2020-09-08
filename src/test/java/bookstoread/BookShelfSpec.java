@@ -1,11 +1,14 @@
 package bookstoread;
 
+import bookstoread.exceptions.BookShelfCapacityReachedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.LocalDate;
+import java.time.Month;
 import java.time.Year;
 import java.util.*;
 
@@ -62,7 +65,7 @@ public class BookShelfSpec {
 
         @DisplayName("Books from bookshelf must be immutable for the client")
         @Test
-        void booksReturnedFromBookshelfIsImmutableForClient() {
+        void booksReturnedFromBookshelfIsImmutableForClient() throws BookShelfCapacityReachedException {
             shelf.addBook(javaEfetivo, programacaoBaixoNivel);
             List<Book> books = shelf.books();
             try {
@@ -79,7 +82,7 @@ public class BookShelfSpec {
     class BooksArrenged {
         @DisplayName("Books must be arranged lexicographically by book title")
         @Test
-        void bookshelfArrangedByBookTitle() {
+        void bookshelfArrangedByBookTitle() throws BookShelfCapacityReachedException {
             shelf.addBook(programacaoBaixoNivel, javaEfetivo, segredosdoNinjaJavascript);
             List<Book> books = shelf.arrange();
             assertEquals(Arrays.asList(javaEfetivo, programacaoBaixoNivel, segredosdoNinjaJavascript),
@@ -88,7 +91,7 @@ public class BookShelfSpec {
 
         @DisplayName("Books In BookShelf Are In Insertion Order After Calling Arrange")
         @Test
-        void booksInBookShelfAreInInsertionOrderAfterCallingArrange() {
+        void booksInBookShelfAreInInsertionOrderAfterCallingArrange() throws BookShelfCapacityReachedException {
             shelf.addBook(programacaoBaixoNivel, javaEfetivo, segredosdoNinjaJavascript);
             shelf.arrange();
             List<Book> books = shelf.books();
@@ -98,7 +101,7 @@ public class BookShelfSpec {
 
         @DisplayName("Bookshelf Arrenged By User Provided Criteria")
         @Test
-        void bookshelfArrengedByUserProvidedCriteria() {
+        void bookshelfArrengedByUserProvidedCriteria() throws BookShelfCapacityReachedException {
             shelf.addBook(programacaoBaixoNivel, javaEfetivo, segredosdoNinjaJavascript);
             Comparator<Book> reversed = Comparator.<Book>naturalOrder().reversed();
             List<Book> books = shelf.arrange(reversed);
@@ -107,7 +110,7 @@ public class BookShelfSpec {
 
         @DisplayName("Bookshelf Arranged By Descending Date Of Publishing")
         @Test
-        void bookshelfArrangedByDescendingDateOfPublishing() {
+        void bookshelfArrangedByDescendingDateOfPublishing() throws BookShelfCapacityReachedException {
             shelf.addBook(javaEfetivo, programacaoBaixoNivel, segredosdoNinjaJavascript);
             Comparator<Book> publishedDateDesc = Comparator.comparing(Book::getPublishedOn).reversed();
             List<Book> books = shelf.arrange(publishedDateDesc);
@@ -116,7 +119,7 @@ public class BookShelfSpec {
 
         @DisplayName("Bookshelf Arranged By Ascending Date Of Publishing")
         @Test
-        void bookshelfArrangedByAscendingDateOfPublishing() {
+        void bookshelfArrangedByAscendingDateOfPublishing() throws BookShelfCapacityReachedException {
             shelf.addBook(javaEfetivo, programacaoBaixoNivel, segredosdoNinjaJavascript);
             Comparator<Book> publishedDateAsc = Comparator.comparing(Book::getPublishedOn);
             List<Book> books = shelf.arrange(publishedDateAsc);
@@ -130,7 +133,7 @@ public class BookShelfSpec {
     class BooksGroupBy {
         @DisplayName("Books inside a bookshelf are grouped by Publication Year")
         @Test
-        void groupBooksInsideBookShelfByPublicationYear() {
+        void groupBooksInsideBookShelfByPublicationYear() throws BookShelfCapacityReachedException {
             shelf.addBook(javaEfetivo, programacaoBaixoNivel, segredosdoNinjaJavascript, cleanCode);
             Map<Year, List<Book>> booksByPublicationYear = shelf.groupByPublicationYear();
 
@@ -149,7 +152,7 @@ public class BookShelfSpec {
 
         @DisplayName("Books inside bookshelf are grouped according to user provided criteria(group by author name)")
         @Test
-        void groupBooksByUserProviedCriteria() {
+        void groupBooksByUserProviedCriteria() throws BookShelfCapacityReachedException {
             shelf.addBook(javaEfetivo, programacaoBaixoNivel);
             Map<String, List<Book>> booksByAuthor = shelf.groupBy(Book::getAuthor);
 
@@ -160,6 +163,47 @@ public class BookShelfSpec {
             assertThat(booksByAuthor)
                     .containsKey("Igor Zhirkov")
                     .containsValues(Collections.singletonList(programacaoBaixoNivel));
+        }
+    }
+
+    @DisplayName("Search")
+    @Nested
+    class BookshelfShearchSpec {
+
+        @BeforeEach
+        void setUp() throws BookShelfCapacityReachedException {
+            shelf.addBook(javaEfetivo, programacaoBaixoNivel, segredosdoNinjaJavascript, cleanCode);
+        }
+
+        @DisplayName("Should Find Book With Title Containing Text")
+        @Test
+        void shouldFindBookWithTitleContainingText() {
+            List<Book> bookList = shelf.findBooksByTitle("java");
+            assertThat(bookList.size()).isEqualTo(2);
+        }
+
+        @DisplayName("Should Filter Searched Books Based On Published Date")
+        @Test
+        void shouldFilterSearchedBooksBasedOnPublishedDate() {
+            List<Book> bookList = shelf.findBooksByTitle("java", book ->
+                    book.getPublishedOn().isBefore(LocalDate.of(2009, Month.JANUARY, 1)));
+            assertThat(bookList.size()).isEqualTo(1);
+        }
+    }
+
+    @DisplayName("Book shelf size exception test")
+    @Nested
+    class BookshelfSizeSpec {
+
+        @DisplayName("Should throw exception BookShelfCapacityReachedException")
+        @Test
+        void throwsExceptionWhenBooksAreAddedAfterCapacityIsReached() throws BookShelfCapacityReachedException {
+            BookShelf newShelf = new BookShelf(2);
+            newShelf.addBook(javaEfetivo, segredosdoNinjaJavascript);
+
+            BookShelfCapacityReachedException throwException =
+                    assertThrows(BookShelfCapacityReachedException.class, () -> newShelf.addBook(programacaoBaixoNivel));
+            assertEquals("BookShelf capacity of 2 is reached. You can't add more books.", throwException.getMessage());
         }
     }
 }
